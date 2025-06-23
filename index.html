@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>立体四子棋</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #1a2a6c);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            color: white;
+            overflow-x: hidden;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 20px;
+            width: 100%;
+            padding: 10px;
+        }
+
+        h1 {
+            font-size: 2.8rem;
+            margin-bottom: 10px;
+            text-shadow: 0 0 10px rgba(0, 255, 255, 0.7);
+            letter-spacing: 2px;
+            background: linear-gradient(to right, #ff00cc, #3333ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            margin-bottom: 20px;
+        }
+
+        .game-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 30px;
+            perspective: 1200px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .layer-container {
+            background: rgba(20, 30, 48, 0.85);
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+            transition: transform 0.5s;
+        }
+
+        .layer-container:hover {
+            transform: translateY(-5px);
+        }
+
+        .layer-title {
+            text-align: center;
+            font-size: 1.4rem;
+            margin-bottom: 15px;
+            color: #4fc3f7;
+            font-weight: bold;
+        }
+
+        .layer {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            grid-template-rows: repeat(4, 1fr);
+            gap: 4px;
+            background: rgba(15, 23, 42, 0.9);
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.5);
+            position: relative;
+        }
+
+        .cell {
+            width: 60px;
+            height: 60px;
+            background: rgba(30, 41, 59, 0.8);
+            border-radius: 8px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+        }
+
+        .cell:hover {
+            background: rgba(56, 71, 96, 0.9);
+            transform: scale(1.05);
+        }
+
+        .cell::before,
+        .cell::after {
+            content: '';
+            position: absolute;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .cell::before {
+            width: 100%;
+            height: 1px;
+            top: 50%;
+            left: 0;
+        }
+
+        .cell::after {
+            width: 1px;
+            height: 100%;
+            left: 50%;
+            top: 0;
+        }
+
+        .piece {
+            width: 80%;
+            height: 80%;
+            border-radius: 50%;
+            position: absolute;
+            z-index: 2;
+            transition: transform 0.3s ease;
+            box-shadow: 0 3px 8px rgba(0, 0, 0, 0.4);
+        }
+
+        .player1 {
+            background: radial-gradient(circle at 30% 30%, #ff5252, #b33939);
+            border: 2px solid #ff8a80;
+        }
+
+        .player2 {
+            background: radial-gradient(circle at 30% 30%, #448aff, #2962ff);
+            border: 2px solid #82b1ff;
+        }
+
+        .piece.placed {
+            transform: scale(1);
+        }
+
+        .info-panel {
+            background: rgba(20, 30, 48, 0.85);
+            border-radius: 15px;
+            padding: 20px;
+            margin-top: 25px;
+            width: 100%;
+            max-width: 800px;
+            text-align: center;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.6);
+        }
+
+        .status {
+            font-size: 1.8rem;
+            margin-bottom: 20px;
+            min-height: 40px;
+            color: #4fc3f7;
+            font-weight: bold;
+            text-shadow: 0 0 8px rgba(79, 195, 247, 0.6);
+        }
+
+        .player-indicator {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-bottom: 20px;
+        }
+
+        .player {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 20px;
+            border-radius: 50px;
+            background: rgba(30, 41, 59, 0.7);
+            transition: all 0.3s;
+        }
+
+        .player.active {
+            background: rgba(56, 71, 96, 0.9);
+            box-shadow: 0 0 15px rgba(79, 195, 247, 0.5);
+            transform: scale(1.05);
+        }
+
+        .player-color {
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+        }
+
+        .player1-color {
+            background: radial-gradient(circle at 30% 30%, #ff5252, #b33939);
+        }
+
+        .player2-color {
+            background: radial-gradient(circle at 30% 30%, #448aff, #2962ff);
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        button {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 50px;
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.4);
+            background: linear-gradient(135deg, #3ca0db, #2d8ac9);
+        }
+
+        button:active {
+            transform: translateY(1px);
+        }
+
+        .instructions {
+            margin-top: 25px;
+            background: rgba(20, 30, 48, 0.85);
+            border-radius: 15px;
+            padding: 20px;
+            max-width: 800px;
+            width: 100%;
+        }
+
+        .instructions h3 {
+            color: #4fc3f7;
+            margin-bottom: 15px;
+            font-size: 1.4rem;
+        }
+
+        .instructions ul {
+            padding-left: 25px;
+            text-align: left;
+        }
+
+        .instructions li {
+            margin-bottom: 10px;
+            line-height: 1.5;
+        }
+
+        .winning-piece {
+            animation: pulse 1.5s infinite;
+            box-shadow: 0 0 15px gold, 0 0 30px gold;
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.1);
+            }
+
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        @media (max-width: 1000px) {
+            .game-container {
+                gap: 20px;
+            }
+
+            .cell {
+                width: 50px;
+                height: 50px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .game-container {
+                gap: 15px;
+            }
+
+            .layer-container {
+                padding: 15px;
+            }
+
+            .cell {
+                width: 40px;
+                height: 40px;
+            }
+
+            h1 {
+                font-size: 2.2rem;
+            }
+        }
+
+        footer {
+            margin-top: 30px;
+            text-align: center;
+            opacity: 0.8;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <h1>立体四子棋</h1>
+        <p class="subtitle">在三维空间中连成四子获胜！</p>
+    </header>
+
+    <div class="game-container">
+        <div class="layer-container">
+            <div class="layer-title">第一层（底层）</div>
+            <div class="layer" id="layer0"></div>
+        </div>
+        <div class="layer-container">
+            <div class="layer-title">第二层</div>
+            <div class="layer" id="layer1"></div>
+        </div>
+        <div class="layer-container">
+            <div class="layer-title">第三层</div>
+            <div class="layer" id="layer2"></div>
+        </div>
+        <div class="layer-container">
+            <div class="layer-title">第四层（顶层）</div>
+            <div class="layer" id="layer3"></div>
+        </div>
+    </div>
+
+    <div class="info-panel">
+        <div class="status" id="status">玩家1的回合</div>
+
+        <div class="player-indicator">
+            <div class="player active" id="player1-indicator">
+                <div class="player-color player1-color"></div>
+                <span>玩家1</span>
+            </div>
+            <div class="player" id="player2-indicator">
+                <div class="player-color player2-color"></div>
+                <span>玩家2</span>
+            </div>
+        </div>
+
+        <div class="controls">
+            <button id="restart">重新开始</button>
+            <button id="undo">悔棋</button>
+        </div>
+    </div>
+
+    <div class="instructions">
+        <h3>游戏规则</h3>
+        <ul>
+            <li>两个玩家轮流在4×4×4的立方体网格中放置棋子</li>
+            <li>玩家1使用红色棋子，玩家2使用蓝色棋子</li>
+            <li>第一层（底层）可以直接放置棋子</li>
+            <li>其他层放置棋子时，正下方位置必须有棋子支撑</li>
+            <li>在任意方向（横、竖、斜）连成四子即可获胜</li>
+            <li>获胜方向包括：水平线、垂直线、对角线（同一层）、空间对角线（跨层）</li>
+        </ul>
+    </div>
+
+    <footer>
+        <p>© 2023 立体四子棋 | 三维策略游戏</p>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // 游戏状态
+            const gameState = {
+                currentPlayer: 1, // 1: 玩家1, 2: 玩家2
+                board: Array(4).fill().map(() => Array(4).fill().map(() => Array(4).fill(0))),
+                gameOver: false,
+                moveHistory: []
+            };
+
+            // 初始化棋盘
+            function initBoard() {
+                for (let layer = 0; layer < 4; layer++) {
+                    const layerElement = document.getElementById(`layer${layer}`);
+                    layerElement.innerHTML = '';
+
+                    for (let row = 0; row < 4; row++) {
+                        for (let col = 0; col < 4; col++) {
+                            const cell = document.createElement('div');
+                            cell.className = 'cell';
+                            cell.dataset.layer = layer;
+                            cell.dataset.row = row;
+                            cell.dataset.col = col;
+
+                            cell.addEventListener('click', () => makeMove(layer, row, col));
+
+                            layerElement.appendChild(cell);
+                        }
+                    }
+                }
+            }
+
+            // 下棋
+            function makeMove(layer, row, col) {
+                if (gameState.gameOver) return;
+
+                // 检查位置是否有效
+                if (gameState.board[layer][row][col] !== 0) return;
+
+                // 检查下方是否有支撑（第一层除外）
+                if (layer > 0 && gameState.board[layer - 1][row][col] === 0) {
+                    alert('不能在此位置下棋，下方没有支撑！');
+                    return;
+                }
+
+                // 记录移动历史
+                gameState.moveHistory.push({ layer, row, col, player: gameState.currentPlayer });
+
+                // 更新棋盘状态
+                gameState.board[layer][row][col] = gameState.currentPlayer;
+
+                // 在棋盘上放置棋子
+                const cell = document.querySelector(`.cell[data-layer="${layer}"][data-row="${row}"][data-col="${col}"]`);
+                const piece = document.createElement('div');
+                piece.className = `piece player${gameState.currentPlayer}`;
+                cell.appendChild(piece);
+
+                // 添加动画效果
+                setTimeout(() => {
+                    piece.classList.add('placed');
+                }, 10);
+
+                // 检查是否获胜
+                if (checkWin(layer, row, col)) {
+                    gameState.gameOver = true;
+                    document.getElementById('status').textContent = `玩家${gameState.currentPlayer}获胜！`;
+                    highlightWinningPieces();
+                    return;
+                }
+
+                // 检查是否平局
+                if (checkDraw()) {
+                    gameState.gameOver = true;
+                    document.getElementById('status').textContent = '平局！';
+                    return;
+                }
+
+                // 切换玩家
+                gameState.currentPlayer = gameState.currentPlayer === 1 ? 2 : 1;
+                updatePlayerIndicator();
+                document.getElementById('status').textContent = `玩家${gameState.currentPlayer}的回合`;
+            }
+
+            // 检查是否获胜
+            function checkWin(layer, row, col) {
+                const player = gameState.board[layer][row][col];
+                if (player === 0) return false;
+
+                // 检查方向：层方向、行方向、列方向、对角线、空间对角线
+                const directions = [
+                    // 水平方向（同一层）
+                    [0, 0, 1], [0, 1, 0], [0, 1, 1], [0, 1, -1],
+                    // 垂直方向（同一列）
+                    [1, 0, 0], [1, 1, 0], [1, -1, 0],
+                    // 空间对角线
+                    [1, 1, 1], [1, 1, -1], [1, -1, 1], [1, -1, -1]
+                ];
+
+                for (const [dl, dr, dc] of directions) {
+                    let count = 1; // 当前位置已有一个棋子
+
+                    // 正向检查
+                    count += countDirection(layer, row, col, dl, dr, dc, player);
+                    // 反向检查
+                    count += countDirection(layer, row, col, -dl, -dr, -dc, player);
+
+                    if (count >= 4) {
+                        return true;
+                    }
+                }
+
+                return false;
+            }
+
+            // 计算指定方向上的连续棋子数
+            function countDirection(layer, row, col, dl, dr, dc, player) {
+                let count = 0;
+                let l = layer + dl;
+                let r = row + dr;
+                let c = col + dc;
+
+                while (l >= 0 && l < 4 && r >= 0 && r < 4 && c >= 0 && c < 4) {
+                    if (gameState.board[l][r][c] === player) {
+                        count++;
+                        l += dl;
+                        r += dr;
+                        c += dc;
+                    } else {
+                        break;
+                    }
+                }
+
+                return count;
+            }
+
+            // 高亮显示获胜的棋子
+            function highlightWinningPieces() {
+                document.querySelectorAll('.piece').forEach(piece => {
+                    piece.classList.add('winning-piece');
+                });
+            }
+
+            // 检查是否平局
+            function checkDraw() {
+                for (let layer = 0; layer < 4; layer++) {
+                    for (let row = 0; row < 4; row++) {
+                        for (let col = 0; col < 4; col++) {
+                            if (gameState.board[layer][row][col] === 0) {
+                                return false;
+                            }
+                        }
+                    }
+                }
+                return true;
+            }
+
+            // 更新玩家指示器
+            function updatePlayerIndicator() {
+                const p1 = document.getElementById('player1-indicator');
+                const p2 = document.getElementById('player2-indicator');
+
+                if (gameState.currentPlayer === 1) {
+                    p1.classList.add('active');
+                    p2.classList.remove('active');
+                } else {
+                    p1.classList.remove('active');
+                    p2.classList.add('active');
+                }
+            }
+
+            // 悔棋
+            function undoMove() {
+                if (gameState.gameOver || gameState.moveHistory.length === 0) return;
+
+                const lastMove = gameState.moveHistory.pop();
+                gameState.board[lastMove.layer][lastMove.row][lastMove.col] = 0;
+
+                const cell = document.querySelector(`.cell[data-layer="${lastMove.layer}"][data-row="${lastMove.row}"][data-col="${lastMove.col}"]`);
+                cell.innerHTML = '';
+
+                // 切换回上一个玩家
+                gameState.currentPlayer = lastMove.player;
+                updatePlayerIndicator();
+                document.getElementById('status').textContent = `玩家${gameState.currentPlayer}的回合`;
+            }
+
+            // 重新开始游戏
+            function restartGame() {
+                // 重置游戏状态
+                gameState.currentPlayer = 1;
+                gameState.board = Array(4).fill().map(() => Array(4).fill().map(() => Array(4).fill(0)));
+                gameState.gameOver = false;
+                gameState.moveHistory = [];
+
+                // 更新UI
+                document.querySelectorAll('.piece').forEach(piece => piece.remove());
+                document.getElementById('status').textContent = '玩家1的回合';
+                updatePlayerIndicator();
+
+                // 移除获胜高亮
+                document.querySelectorAll('.winning-piece').forEach(piece => {
+                    piece.classList.remove('winning-piece');
+                });
+            }
+
+            // 事件监听
+            document.getElementById('restart').addEventListener('click', restartGame);
+            document.getElementById('undo').addEventListener('click', undoMove);
+
+            // 初始化游戏
+            initBoard();
+            updatePlayerIndicator();
+        });
+    </script>
+</body>
+
+</html>
