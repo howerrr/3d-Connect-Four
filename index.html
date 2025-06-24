@@ -1071,7 +1071,6 @@
             
             // 下棋
             function makeMove(layer, row, col) {
-                console.log('layer, row, col, gameState', layer, row, col, gameState);
                 if (gameState.gameOver) return;
                 if (gameState.isAiThinking) return;
                 
@@ -1187,7 +1186,7 @@
                 
                 // 如果是人机模式且轮到AI，则让AI下棋
                 if (gameState.gameMode === 'pvc' && gameState.currentPlayer === gameState.aiPlayer && !gameState.gameOver) {
-                    setTimeout(() => aiMakeMove(), 600);
+                    aiMakeMove();
                 }
             }
             
