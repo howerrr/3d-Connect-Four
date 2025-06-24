@@ -65,7 +65,7 @@
         
         .header-controls {
             display: flex;
-            gap: 15px;
+            gap: 10px;
         }
         
         .header-btn {
@@ -76,7 +76,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 18px;
+            font-size: 16px;
             cursor: pointer;
             transition: all 0.2s;
             border: 1px solid rgba(255, 255, 255, 0.2);
@@ -92,8 +92,8 @@
             max-width: 800px;
             display: flex;
             flex-direction: column;
-            gap: 15px;
-            margin: 10px 0;
+            gap: 12px;
+            margin: 5px 0;
         }
         
         /* 游戏状态栏 */
@@ -103,15 +103,15 @@
             align-items: center;
             background: rgba(30, 41, 59, 0.7);
             border-radius: 12px;
-            padding: 12px 15px;
+            padding: 10px;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
         }
         
         .player-indicator {
             display: flex;
             align-items: center;
-            gap: 12px;
-            min-width: 120px;
+            gap: 10px;
+            min-width: 100px;
         }
         
         .player-info {
@@ -121,18 +121,18 @@
         }
         
         .player-timer {
-            font-size: 0.85rem;
+            font-size: 0.8rem;
             background: rgba(0, 0, 0, 0.3);
-            padding: 2px 8px;
-            border-radius: 12px;
-            margin-top: 5px;
+            padding: 2px 6px;
+            border-radius: 10px;
+            margin-top: 3px;
             color: #4fc3f7;
             white-space: nowrap;
         }
         
         .player-color {
-            width: 24px;
-            height: 24px;
+            width: 20px;
+            height: 20px;
             border-radius: 50%;
             border: 2px solid rgba(255, 255, 255, 0.3);
         }
@@ -146,11 +146,11 @@
         }
         
         .status {
-            font-size: 1.1rem;
+            font-size: 1rem;
             font-weight: bold;
             text-align: center;
             flex-grow: 1;
-            padding: 0 10px;
+            padding: 0 8px;
             transition: all 0.3s ease;
         }
         
@@ -187,21 +187,21 @@
         .grid-container {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
-            gap: 10px;
+            gap: 8px;
         }
         
         .layer-container {
             background: rgba(20, 30, 48, 0.7);
-            border-radius: 12px;
-            padding: 12px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4);
+            border-radius: 10px;
+            padding: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
             position: relative;
         }
         
         .layer-title {
             text-align: center;
-            font-size: 0.9rem;
-            margin-bottom: 8px;
+            font-size: 0.85rem;
+            margin-bottom: 5px;
             color: #81d4fa;
         }
         
@@ -209,17 +209,17 @@
             display: grid;
             grid-template-columns: repeat(4, 1fr);
             grid-template-rows: repeat(4, 1fr);
-            gap: 3px;
+            gap: 2px;
             background: rgba(30, 41, 59, 0.5);
-            padding: 8px;
-            border-radius: 8px;
+            padding: 6px;
+            border-radius: 6px;
         }
         
         .cell {
             width: 100%;
             aspect-ratio: 1/1;
             background: rgba(40, 53, 80, 0.5);
-            border-radius: 6px;
+            border-radius: 4px;
             position: relative;
             cursor: pointer;
             transition: all 0.2s ease;
@@ -274,7 +274,7 @@
         
         .winning-piece {
             animation: pulse 1.5s infinite;
-            box-shadow: 0 0 10px gold, 0 0 20px gold;
+            box-shadow: 0 0 8px gold, 0 0 15px gold;
         }
         
         @keyframes pulse {
@@ -297,18 +297,18 @@
         /* 3D视图区域 */
         .view-section {
             background: rgba(20, 30, 48, 0.7);
-            border-radius: 12px;
-            padding: 15px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4);
+            border-radius: 10px;
+            padding: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
             display: flex;
             flex-direction: column;
-            height: 250px;
+            height: 180px; /* 缩小高度 */
         }
         
         #three-container {
             width: 100%;
             height: 100%;
-            border-radius: 10px;
+            border-radius: 8px;
             overflow: hidden;
             background: #0a0f1a;
         }
@@ -382,48 +382,58 @@
         /* 响应式调整 */
         @media (min-width: 768px) {
             .header-container {
-                padding: 15px;
+                padding: 12px;
             }
             
             .game-title {
-                font-size: 1.5rem;
-            }
-            
-            .status {
                 font-size: 1.3rem;
             }
             
+            .status {
+                font-size: 1.1rem;
+            }
+            
             .layer {
-                padding: 10px;
-                gap: 4px;
+                padding: 8px;
+                gap: 3px;
             }
             
             .view-section {
-                height: 300px;
+                height: 220px; /* 缩小高度 */
             }
             
             .player-indicator {
-                min-width: 140px;
+                min-width: 120px;
             }
             
             .player-timer {
-                font-size: 0.95rem;
+                font-size: 0.9rem;
             }
         }
         
         @media (max-width: 480px) {
             .player-indicator {
-                min-width: 100px;
-                gap: 8px;
+                min-width: 90px;
+                gap: 6px;
             }
             
             .player-timer {
-                font-size: 0.75rem;
-                padding: 1px 6px;
+                font-size: 0.7rem;
+                padding: 1px 5px;
             }
             
             .status {
-                font-size: 0.95rem;
+                font-size: 0.9rem;
+            }
+            
+            .header-controls {
+                gap: 8px;
+            }
+            
+            .header-btn {
+                width: 32px;
+                height: 32px;
+                font-size: 14px;
             }
         }
     </style>
@@ -926,9 +936,21 @@
                 
                 // 检查方向
                 const directions = [
+                    // 同一层方向
                     [0, 0, 1], [0, 1, 0], [0, 1, 1], [0, 1, -1],
-                    [1, 0, 0], [1, 1, 0], [1, -1, 0],
-                    [1, 1, 1], [1, 1, -1], [1, -1, 1], [1, -1, -1]
+                    
+                    // 垂直方向
+                    [1, 0, 0],
+                    
+                    // 垂直平面内的对角线
+                    [1, 1, 0], [1, -1, 0], [1, 0, 1], [1, 0, -1],
+                    
+                    // 空间对角线
+                    [1, 1, 1], [1, 1, -1], [1, -1, 1], [1, -1, -1],
+                    
+                    // 垂直平面内的其他斜线方向
+                    [1, 1, 1], [1, 1, -1], [1, -1, 1], [1, -1, -1],
+                    [-1, 1, 1], [-1, 1, -1], [-1, -1, 1], [-1, -1, -1]
                 ];
                 
                 for (const [dl, dr, dc] of directions) {
@@ -1073,8 +1095,8 @@
                 pieceMeshes.forEach(piece => boardGroup.remove(piece));
                 pieceMeshes = [];
                 
-                // 启动计时器
-                startTimer();
+                // 重置3D视图
+                reset3DView();
             }
             
             // 规则弹窗控制
@@ -1092,9 +1114,6 @@
             // 初始化游戏
             initBoard();
             initThreeJS();
-            
-            // 启动计时器
-            startTimer();
         });
     </script>
 </body>
