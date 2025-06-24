@@ -56,6 +56,11 @@
             font-size: 20px;
         }
         
+        .cube-icon {
+            font-size: 24px;
+            color: white;
+        }
+        
         .game-title {
             font-size: 1.2rem;
             background: linear-gradient(to right, #00c9ff, #92fe9d);
@@ -84,6 +89,7 @@
         
         .header-btn:hover {
             background: rgba(255, 255, 255, 0.2);
+            transform: scale(1.1);
         }
         
         /* 主游戏区域 */
@@ -302,7 +308,8 @@
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
             display: flex;
             flex-direction: column;
-            height: 180px; /* 缩小高度 */
+            height: 540px;
+            position: relative;
         }
         
         #three-container {
@@ -379,8 +386,28 @@
             line-height: 1.5;
         }
         
-        /* 响应式调整 */
+        /* 响应式调整 - 电脑端 */
         @media (min-width: 768px) {
+            .game-container {
+                flex-direction: row;
+                flex-wrap: wrap;
+            }
+            
+            .status-bar {
+                width: 100%;
+            }
+            
+            .grid-container {
+                flex: 1;
+                max-width: 500px;
+            }
+            
+            .view-section {
+                flex: 0 0 280px;
+                height: 540px;
+                margin-left: 15px;
+            }
+            
             .header-container {
                 padding: 12px;
             }
@@ -398,16 +425,19 @@
                 gap: 3px;
             }
             
-            .view-section {
-                height: 220px; /* 缩小高度 */
-            }
-            
             .player-indicator {
                 min-width: 120px;
             }
             
             .player-timer {
                 font-size: 0.9rem;
+            }
+        }
+        
+        /* 响应式调整 - 移动端 */
+        @media (max-width: 767px) {
+            .view-section {
+                height: 220px;
             }
         }
         
@@ -436,13 +466,30 @@
                 font-size: 14px;
             }
         }
+        
+        /* 立方体简笔画 */
+        .cube-svg {
+            width: 24px;
+            height: 24px;
+            fill: none;
+            stroke: #fff;
+            stroke-width: 2;
+        }
     </style>
 </head>
 <body>
     <!-- 顶部标题栏 -->
     <div class="header-container">
         <div class="logo">
-            <div class="logo-icon">4</div>
+            <div class="logo-icon">
+                <svg class="cube-svg" viewBox="0 0 24 24">
+                    <path d="M3,3 L21,3 L21,21 L3,21 Z" />
+                    <path d="M3,3 L12,12" />
+                    <path d="M21,3 L12,12" />
+                    <path d="M21,21 L12,12" />
+                    <path d="M3,21 L12,12" />
+                </svg>
+            </div>
             <h1 class="game-title">立体四子棋</h1>
         </div>
         
@@ -524,6 +571,7 @@
                 <li>在任意方向（横、竖、斜）连成四子即可获胜</li>
                 <li>获胜方向包括：水平线、垂直线、对角线、空间对角线</li>
                 <li>点击网格放置棋子，使用3D视图查看棋盘</li>
+                <li>第一步棋不计时，从第二步开始计时</li>
             </ul>
         </div>
     </div>
@@ -543,7 +591,8 @@
                 },
                 currentTimer: null,
                 lastMoveTime: Date.now(),
-                initialCameraPosition: null
+                initialCameraPosition: null,
+                firstMove: true // 标记是否为第一步
             };
             
             // Three.js 变量
@@ -862,7 +911,7 @@
                 }
                 
                 // 停止当前计时器，记录时间
-                if (gameState.currentTimer) {
+                if (gameState.currentTimer && !gameState.firstMove) {
                     clearInterval(gameState.currentTimer);
                     const now = Date.now();
                     const elapsedSeconds = Math.floor((now - gameState.lastMoveTime) / 1000);
@@ -898,6 +947,11 @@
                     highlightWinningPieces(winInfo.winningPieces);
                     highlight2DWinningPieces();
                     updateStatusStyle();
+                    
+                    // 停止计时器
+                    if (gameState.currentTimer) {
+                        clearInterval(gameState.currentTimer);
+                    }
                     return;
                 }
                 
@@ -906,6 +960,11 @@
                     gameState.gameOver = true;
                     document.getElementById('status').textContent = '平局！';
                     updateStatusStyle();
+                    
+                    // 停止计时器
+                    if (gameState.currentTimer) {
+                        clearInterval(gameState.currentTimer);
+                    }
                     return;
                 }
                 
@@ -914,8 +973,13 @@
                 document.getElementById('status').textContent = `玩家${gameState.currentPlayer}回合`;
                 updateStatusStyle();
                 
-                // 为新玩家启动计时器
-                startTimer();
+                // 第一步棋不计时，从第二步开始计时
+                if (gameState.firstMove) {
+                    gameState.firstMove = false;
+                } else {
+                    // 为新玩家启动计时器
+                    startTimer();
+                }
             }
             
             // 高亮2D获胜棋子
@@ -1060,8 +1124,13 @@
                 gameState.gameOver = false;
                 updateStatusStyle();
                 
-                // 启动计时器
-                startTimer();
+                // 如果是第一步，重置firstMove状态
+                if (gameState.moveHistory.length === 0) {
+                    gameState.firstMove = true;
+                } else {
+                    // 启动计时器
+                    startTimer();
+                }
             }
             
             // 重新开始游戏
@@ -1079,6 +1148,7 @@
                 gameState.moveHistory = [];
                 gameState.winningPieces = [];
                 gameState.timers = {1: 0, 2: 0};
+                gameState.firstMove = true;
                 
                 // 更新UI
                 document.querySelectorAll('.piece').forEach(piece => piece.remove());
