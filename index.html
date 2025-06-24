@@ -1071,8 +1071,8 @@
             
             // 下棋
             function makeMove(layer, row, col) {
+                console.log('layer, row, col, gameState', layer, row, col, gameState);
                 if (gameState.gameOver) return;
-                if (gameState.gameMode === 'pvc' && gameState.currentPlayer === gameState.aiPlayer) return;
                 if (gameState.isAiThinking) return;
                 
                 // 检查位置是否有效
