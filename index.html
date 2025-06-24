@@ -1117,6 +1117,10 @@
                 // 添加动画效果
                 setTimeout(() => {
                     piece.classList.add('placed');
+                    document.querySelectorAll('.placed').forEach(piece => {
+                        piece.classList.remove('player-color');
+                    });
+                    piece.classList.add('player-color');
                 }, 10);
 
                 // 添加3D棋子
