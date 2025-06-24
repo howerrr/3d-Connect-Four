@@ -734,7 +734,6 @@
             <h2 class="modal-title">游戏规则</h2>
             <ul class="rules-list">
                 <li>两个玩家轮流在4×4×4的立方体网格中放置棋子</li>
-                <li>玩家1使用红色棋子，玩家2使用蓝色棋子</li>
                 <li>第一层（底层）可以直接放置棋子</li>
                 <li>其他层放置棋子时，正下方位置必须有棋子支撑</li>
                 <li>在任意方向（横、竖、斜）连成四子即可获胜</li>
@@ -1438,13 +1437,60 @@
                     
                     // 根据难度选择AI策略
                     let selectedMove;
+                    const opponent = gameState.aiPlayer === 1 ? 2 : 1;
                     
                     if (gameState.aiDifficulty === 'easy') {
-                        // 简单难度：随机选择
-                        selectedMove = validMoves[Math.floor(Math.random() * validMoves.length)];
-                    } else {
-                        // 中等和困难难度：尝试寻找获胜或阻止对手获胜的移动
-                        const opponent = gameState.aiPlayer === 1 ? 2 : 1;
+                        // 简单难度：基础防守策略
+                        
+                        // 1. 检查AI是否可以立即获胜
+                        for (const move of validMoves) {
+                            gameState.board[move.layer][move.row][move.col] = gameState.aiPlayer;
+                            if (checkWin(move.layer, move.row, move.col).win) {
+                                selectedMove = move;
+                                gameState.board[move.layer][move.row][move.col] = 0;
+                                break;
+                            }
+                            gameState.board[move.layer][move.row][move.col] = 0;
+                        }
+                        
+                        // 2. 检查玩家是否可以获胜（需要阻止）
+                        if (!selectedMove) {
+                            for (const move of validMoves) {
+                                gameState.board[move.layer][move.row][move.col] = opponent;
+                                if (checkWin(move.layer, move.row, move.col).win) {
+                                    selectedMove = move;
+                                    gameState.board[move.layer][move.row][move.col] = 0;
+                                    break;
+                                }
+                                gameState.board[move.layer][move.row][move.col] = 0;
+                            }
+                        }
+                        
+                        // 3. 策略性选择（中心位置优先）
+                        if (!selectedMove) {
+                            const movesWithScores = validMoves.map(move => {
+                                // 中心位置得分高
+                                const centerDist = 
+                                    Math.abs(move.row - 1.5) + 
+                                    Math.abs(move.col - 1.5) + 
+                                    Math.abs(move.layer - 1.5);
+                                const score = 10 - centerDist;
+                                
+                                // 增加随机性
+                                const randomFactor = Math.random() * 4;
+                                
+                                return { move, score: score + randomFactor };
+                            });
+                            
+                            // 按分数排序
+                            movesWithScores.sort((a, b) => b.score - a.score);
+                            
+                            // 选择前40%的移动
+                            const topMoves = movesWithScores.slice(0, Math.max(1, Math.floor(movesWithScores.length * 0.4)));
+                            selectedMove = topMoves[Math.floor(Math.random() * topMoves.length)].move;
+                        }
+                    } else if (gameState.aiDifficulty === 'medium') {
+                        // 中等难度：平衡策略
                         
                         // 1. 检查AI是否可以立即获胜
                         for (const move of validMoves) {
@@ -1488,13 +1534,70 @@
                                 // 检查该位置是否可以形成连线
                                 score += evaluatePosition(move.layer, move.row, move.col, gameState.aiPlayer);
                                 
-                                // 对于困难难度，增加考虑对手的威胁
-                                if (gameState.aiDifficulty === 'hard') {
-                                    score -= evaluatePosition(move.layer, move.row, move.col, opponent) * 0.7;
-                                }
+                                // 考虑对手的威胁，但权重较低
+                                score -= evaluatePosition(move.layer, move.row, move.col, opponent) * 0.5;
                                 
                                 // 随机性，避免AI行为过于可预测
                                 score += Math.random() * 3;
+                                
+                                return score;
+                            });
+                            
+                            // 选择得分最高的移动
+                            const maxScore = Math.max(...scores);
+                            const bestMoves = validMoves.filter((_, i) => scores[i] === maxScore);
+                            selectedMove = bestMoves[Math.floor(Math.random() * bestMoves.length)];
+                        }
+                    } else {
+                        // 困难难度：深度思考
+                        
+                        // 1. 检查AI是否可以立即获胜
+                        for (const move of validMoves) {
+                            gameState.board[move.layer][move.row][move.col] = gameState.aiPlayer;
+                            if (checkWin(move.layer, move.row, move.col).win) {
+                                selectedMove = move;
+                                gameState.board[move.layer][move.row][move.col] = 0;
+                                break;
+                            }
+                            gameState.board[move.layer][move.row][move.col] = 0;
+                        }
+                        
+                        if (!selectedMove) {
+                            // 2. 检查玩家是否可以获胜（需要阻止）
+                            for (const move of validMoves) {
+                                gameState.board[move.layer][move.row][move.col] = opponent;
+                                if (checkWin(move.layer, move.row, move.col).win) {
+                                    selectedMove = move;
+                                    gameState.board[move.layer][move.row][move.col] = 0;
+                                    break;
+                                }
+                                gameState.board[move.layer][move.row][move.col] = 0;
+                            }
+                        }
+                        
+                        if (!selectedMove) {
+                            // 3. 策略性选择
+                            // 优先选择中心位置和能够形成连线的位置
+                            
+                            // 评分系统
+                            const scores = validMoves.map(move => {
+                                let score = 0;
+                                
+                                // 位置权重：中心位置得分更高
+                                const centerDist = 
+                                    Math.abs(move.row - 1.5) + 
+                                    Math.abs(move.col - 1.5) + 
+                                    Math.abs(move.layer - 1.5);
+                                score += (6 - centerDist) * 2;
+                                
+                                // 检查该位置是否可以形成连线
+                                score += evaluatePosition(move.layer, move.row, move.col, gameState.aiPlayer);
+                                
+                                // 考虑对手的威胁
+                                score -= evaluatePosition(move.layer, move.row, move.col, opponent) * 0.8;
+                                
+                                // 随机性，避免AI行为过于可预测
+                                score += Math.random() * 1;
                                 
                                 return score;
                             });
