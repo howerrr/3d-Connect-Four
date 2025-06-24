@@ -151,6 +151,15 @@
             background: radial-gradient(circle at 30% 30%, #448aff, #2962ff);
         }
         
+        .ai-icon {
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #9c27b0;
+        }
+        
         .status {
             font-size: 1rem;
             font-weight: bold;
@@ -181,6 +190,12 @@
             color: #ffeb3b;
             text-shadow: 0 0 12px rgba(255, 235, 59, 0.7);
             animation: pulse-text 2s infinite;
+        }
+        
+        .ai-thinking {
+            color: #9c27b0;
+            text-shadow: 0 0 8px rgba(156, 39, 176, 0.5);
+            animation: pulse-text 1.5s infinite;
         }
         
         @keyframes pulse-text {
@@ -321,7 +336,7 @@
         }
         
         /* 规则弹窗 */
-        .rules-modal {
+        .modal {
             position: fixed;
             top: 0;
             left: 0;
@@ -337,17 +352,17 @@
             transition: all 0.3s ease;
         }
         
-        .rules-modal.active {
+        .modal.active {
             opacity: 1;
             visibility: visible;
         }
         
-        .rules-content {
+        .modal-content {
             background: linear-gradient(135deg, #1a2a6c, #2c3e50);
             width: 90%;
             max-width: 400px;
             border-radius: 16px;
-            padding: 20px;
+            padding: 25px;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
             position: relative;
             max-height: 80vh;
@@ -370,7 +385,7 @@
             font-size: 18px;
         }
         
-        .rules-title {
+        .modal-title {
             text-align: center;
             font-size: 1.4rem;
             margin-bottom: 15px;
@@ -379,11 +394,117 @@
         
         .rules-list {
             padding-left: 20px;
+            margin-bottom: 20px;
         }
         
         .rules-list li {
             margin-bottom: 10px;
             line-height: 1.5;
+        }
+        
+        /* 设置区域 */
+        .settings-section {
+            margin-top: 20px;
+        }
+        
+        .setting-group {
+            margin-bottom: 15px;
+        }
+        
+        .setting-title {
+            font-size: 1.1rem;
+            margin-bottom: 10px;
+            color: #81d4fa;
+        }
+        
+        .options-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+        }
+        
+        .option-btn {
+            padding: 8px 16px;
+            border-radius: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            min-width: 100px;
+            text-align: center;
+        }
+        
+        .option-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+        
+        .option-btn.active {
+            background: linear-gradient(135deg, #00c9ff, #92fe9d);
+            color: #0c1220;
+            font-weight: bold;
+            border-color: rgba(0, 0, 0, 0.3);
+        }
+        
+        /* AI难度选择 */
+        .diff-btn {
+            padding: 6px 12px;
+            border-radius: 15px;
+            background: rgba(156, 39, 176, 0.2);
+            border: 1px solid rgba(156, 39, 176, 0.3);
+            color: #e1bee7;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .diff-btn:hover {
+            background: rgba(156, 39, 176, 0.3);
+        }
+        
+        .diff-btn.active {
+            background: linear-gradient(135deg, #9c27b0, #7b1fa2);
+            color: white;
+            font-weight: bold;
+        }
+        
+        .player-order {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 15px;
+        }
+        
+        .order-option {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+        }
+        
+        .order-radio {
+            width: 18px;
+            height: 18px;
+            border: 2px solid #81d4fa;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .order-radio::after {
+            content: '';
+            width: 10px;
+            height: 10px;
+            background: #00c9ff;
+            border-radius: 50%;
+            display: none;
+        }
+        
+        .order-option.active .order-radio::after {
+            display: block;
         }
         
         /* 响应式调整 - 电脑端 */
@@ -494,6 +615,9 @@
         </div>
         
         <div class="header-controls">
+            <div class="header-btn" id="settings-btn" title="游戏设置">
+                <i class="fas fa-cog"></i>
+            </div>
             <div class="header-btn" id="restart" title="重新开始">
                 <i class="fas fa-redo"></i>
             </div>
@@ -516,7 +640,7 @@
             <div class="player-indicator">
                 <div class="player-color player1-color"></div>
                 <div class="player-info">
-                    <span>玩家1</span>
+                    <span id="player1-name">玩家1</span>
                     <div class="player-timer" id="player1-timer">00:00</div>
                 </div>
             </div>
@@ -525,7 +649,7 @@
             
             <div class="player-indicator" style="justify-content: end;">
                 <div class="player-info">
-                    <span>玩家2</span>
+                    <span id="player2-name">玩家2</span>
                     <div class="player-timer" id="player2-timer">00:00</div>
                 </div>
                 <div class="player-color player2-color"></div>
@@ -558,11 +682,56 @@
         </div>
     </div>
     
+    <!-- 设置弹窗 -->
+    <div class="modal" id="settings-modal">
+        <div class="modal-content">
+            <div class="close-btn" id="close-settings">×</div>
+            <h2 class="modal-title">游戏设置</h2>
+            
+            <div class="settings-section">
+                <div class="setting-group">
+                    <h3 class="setting-title">游戏模式</h3>
+                    <div class="options-container">
+                        <div class="option-btn active" id="pvp-mode">双人对战</div>
+                        <div class="option-btn" id="pvc-mode">人机对战</div>
+                    </div>
+                </div>
+                
+                <div class="setting-group">
+                    <h3 class="setting-title">AI难度</h3>
+                    <div class="options-container">
+                        <div class="option-btn diff-btn" id="easy-diff">简单</div>
+                        <div class="option-btn diff-btn active" id="medium-diff">中等</div>
+                        <div class="option-btn diff-btn" id="hard-diff">困难</div>
+                    </div>
+                </div>
+                
+                <div class="setting-group">
+                    <h3 class="setting-title">玩家顺序</h3>
+                    <div class="player-order">
+                        <div class="order-option active" id="ai-second">
+                            <div class="order-radio"></div>
+                            <span>我先手</span>
+                        </div>
+                        <div class="order-option" id="ai-first">
+                            <div class="order-radio"></div>
+                            <span>AI先手</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <button class="option-btn" id="apply-settings" style="width: 100%; margin-top: 20px;">
+                应用设置
+            </button>
+        </div>
+    </div>
+    
     <!-- 规则弹窗 -->
-    <div class="rules-modal" id="rules-modal">
-        <div class="rules-content">
+    <div class="modal" id="rules-modal">
+        <div class="modal-content">
             <div class="close-btn" id="close-rules">×</div>
-            <h2 class="rules-title">游戏规则</h2>
+            <h2 class="modal-title">游戏规则</h2>
             <ul class="rules-list">
                 <li>两个玩家轮流在4×4×4的立方体网格中放置棋子</li>
                 <li>玩家1使用红色棋子，玩家2使用蓝色棋子</li>
@@ -572,7 +741,12 @@
                 <li>获胜方向包括：水平线、垂直线、对角线、空间对角线</li>
                 <li>点击网格放置棋子，使用3D视图查看棋盘</li>
                 <li>第一步棋不计时，从第二步开始计时</li>
+                <li><strong>人机模式</strong>: AI将自动下棋，可选择不同难度</li>
             </ul>
+            
+            <button class="option-btn" id="close-rules-btn" style="width: 100%;">
+                关闭
+            </button>
         </div>
     </div>
     
@@ -592,7 +766,11 @@
                 currentTimer: null,
                 lastMoveTime: Date.now(),
                 initialCameraPosition: null,
-                firstMove: true // 标记是否为第一步
+                firstMove: true, // 标记是否为第一步
+                gameMode: 'pvp', // 'pvp' 或 'pvc'
+                aiDifficulty: 'medium', // 'easy', 'medium', 'hard'
+                aiPlayer: 2, // AI玩家编号
+                isAiThinking: false // AI是否正在思考
             };
             
             // Three.js 变量
@@ -863,7 +1041,18 @@
                 const statusElement = document.getElementById('status');
                 
                 // 移除所有样式类
-                statusElement.classList.remove('player1-turn', 'player2-turn', 'win-status', 'draw-status');
+                statusElement.classList.remove(
+                    'player1-turn', 
+                    'player2-turn', 
+                    'win-status', 
+                    'draw-status',
+                    'ai-thinking'
+                );
+                
+                if (gameState.isAiThinking) {
+                    statusElement.classList.add('ai-thinking');
+                    return;
+                }
                 
                 if (gameState.gameOver) {
                     if (statusElement.textContent.includes('获胜')) {
@@ -883,6 +1072,8 @@
             // 下棋
             function makeMove(layer, row, col) {
                 if (gameState.gameOver) return;
+                if (gameState.gameMode === 'pvc' && gameState.currentPlayer === gameState.aiPlayer) return;
+                if (gameState.isAiThinking) return;
                 
                 // 检查位置是否有效
                 if (gameState.board[layer][row][col] !== 0) return;
@@ -943,7 +1134,9 @@
                 if (winInfo.win) {
                     gameState.gameOver = true;
                     gameState.winningPieces = winInfo.winningPieces;
-                    document.getElementById('status').textContent = `玩家${gameState.currentPlayer}获胜！`;
+                    document.getElementById('status').textContent = 
+                        gameState.gameMode === 'pvp' ? `玩家${gameState.currentPlayer}获胜！` : 
+                        gameState.currentPlayer === gameState.aiPlayer ? 'AI获胜！' : '你赢了！';
                     highlightWinningPieces(winInfo.winningPieces);
                     highlight2DWinningPieces();
                     updateStatusStyle();
@@ -970,7 +1163,18 @@
                 
                 // 切换玩家
                 gameState.currentPlayer = gameState.currentPlayer === 1 ? 2 : 1;
-                document.getElementById('status').textContent = `玩家${gameState.currentPlayer}回合`;
+                
+                // 更新状态文本
+                if (gameState.gameMode === 'pvp') {
+                    document.getElementById('status').textContent = `玩家${gameState.currentPlayer}回合`;
+                } else {
+                    if (gameState.currentPlayer === gameState.aiPlayer) {
+                        document.getElementById('status').textContent = 'AI思考中...';
+                    } else {
+                        document.getElementById('status').textContent = '你的回合';
+                    }
+                }
+                
                 updateStatusStyle();
                 
                 // 第一步棋不计时，从第二步开始计时
@@ -979,6 +1183,11 @@
                 } else {
                     // 为新玩家启动计时器
                     startTimer();
+                }
+                
+                // 如果是人机模式且轮到AI，则让AI下棋
+                if (gameState.gameMode === 'pvc' && gameState.currentPlayer === gameState.aiPlayer && !gameState.gameOver) {
+                    setTimeout(() => aiMakeMove(), 600);
                 }
             }
             
@@ -1084,7 +1293,7 @@
             function undoMove() {
                 if (gameState.gameOver || gameState.moveHistory.length === 0) return;
                 
-                // 停止计时器
+                // 停止当前计时器，记录时间
                 if (gameState.currentTimer) {
                     clearInterval(gameState.currentTimer);
                     const now = Date.now();
@@ -1149,10 +1358,13 @@
                 gameState.winningPieces = [];
                 gameState.timers = {1: 0, 2: 0};
                 gameState.firstMove = true;
+                gameState.isAiThinking = false;
                 
                 // 更新UI
                 document.querySelectorAll('.piece').forEach(piece => piece.remove());
-                document.getElementById('status').textContent = '玩家1回合';
+                document.getElementById('status').textContent = 
+                    gameState.gameMode === 'pvp' ? '玩家1回合' : 
+                    gameState.aiPlayer === 1 ? 'AI思考中...' : '你的回合';
                 updateTimerDisplay();
                 updateStatusStyle();
                 
@@ -1167,19 +1379,332 @@
                 
                 // 重置3D视图
                 reset3DView();
+                
+                // 如果是人机模式且AI先手，则让AI下第一步
+                if (gameState.gameMode === 'pvc' && gameState.aiPlayer === 1) {
+                    setTimeout(() => aiMakeMove(), 800);
+                }
             }
             
-            // 规则弹窗控制
-            function toggleRulesModal() {
-                document.getElementById('rules-modal').classList.toggle('active');
+            // AI下棋逻辑
+            function aiMakeMove() {
+                if (gameState.gameOver) return;
+                
+                gameState.isAiThinking = true;
+                document.getElementById('status').textContent = 'AI思考中...';
+                updateStatusStyle();
+                
+                // 根据难度设置思考时间
+                let thinkTime;
+                switch (gameState.aiDifficulty) {
+                    case 'easy':
+                        thinkTime = 800 + Math.random() * 700;
+                        break;
+                    case 'medium':
+                        thinkTime = 1200 + Math.random() * 800;
+                        break;
+                    case 'hard':
+                        thinkTime = 1600 + Math.random() * 1000;
+                        break;
+                    default:
+                        thinkTime = 1200;
+                }
+                
+                setTimeout(() => {
+                    if (gameState.gameOver || gameState.currentPlayer !== gameState.aiPlayer) {
+                        gameState.isAiThinking = false;
+                        return;
+                    }
+                    
+                    gameState.isAiThinking = false;
+                    
+                    // 获取所有合法移动
+                    const validMoves = [];
+                    for (let layer = 0; layer < 4; layer++) {
+                        for (let row = 0; row < 4; row++) {
+                            for (let col = 0; col < 4; col++) {
+                                // 检查位置是否为空
+                                if (gameState.board[layer][row][col] !== 0) continue;
+                                
+                                // 检查下方是否有支撑（第一层除外）
+                                if (layer === 0 || gameState.board[layer-1][row][col] !== 0) {
+                                    validMoves.push({layer, row, col});
+                                }
+                            }
+                        }
+                    }
+                    
+                    // 如果没有合法移动，则返回
+                    if (validMoves.length === 0) return;
+                    
+                    // 根据难度选择AI策略
+                    let selectedMove;
+                    
+                    if (gameState.aiDifficulty === 'easy') {
+                        // 简单难度：随机选择
+                        selectedMove = validMoves[Math.floor(Math.random() * validMoves.length)];
+                    } else {
+                        // 中等和困难难度：尝试寻找获胜或阻止对手获胜的移动
+                        const opponent = gameState.aiPlayer === 1 ? 2 : 1;
+                        
+                        // 1. 检查AI是否可以立即获胜
+                        for (const move of validMoves) {
+                            gameState.board[move.layer][move.row][move.col] = gameState.aiPlayer;
+                            if (checkWin(move.layer, move.row, move.col).win) {
+                                selectedMove = move;
+                                gameState.board[move.layer][move.row][move.col] = 0;
+                                break;
+                            }
+                            gameState.board[move.layer][move.row][move.col] = 0;
+                        }
+                        
+                        if (!selectedMove) {
+                            // 2. 检查玩家是否可以获胜（需要阻止）
+                            for (const move of validMoves) {
+                                gameState.board[move.layer][move.row][move.col] = opponent;
+                                if (checkWin(move.layer, move.row, move.col).win) {
+                                    selectedMove = move;
+                                    gameState.board[move.layer][move.row][move.col] = 0;
+                                    break;
+                                }
+                                gameState.board[move.layer][move.row][move.col] = 0;
+                            }
+                        }
+                        
+                        if (!selectedMove) {
+                            // 3. 策略性选择
+                            // 优先选择中心位置和能够形成连线的位置
+                            
+                            // 评分系统
+                            const scores = validMoves.map(move => {
+                                let score = 0;
+                                
+                                // 位置权重：中心位置得分更高
+                                const centerDist = 
+                                    Math.abs(move.row - 1.5) + 
+                                    Math.abs(move.col - 1.5) + 
+                                    Math.abs(move.layer - 1.5);
+                                score += (6 - centerDist) * 2;
+                                
+                                // 检查该位置是否可以形成连线
+                                score += evaluatePosition(move.layer, move.row, move.col, gameState.aiPlayer);
+                                
+                                // 对于困难难度，增加考虑对手的威胁
+                                if (gameState.aiDifficulty === 'hard') {
+                                    score -= evaluatePosition(move.layer, move.row, move.col, opponent) * 0.7;
+                                }
+                                
+                                // 随机性，避免AI行为过于可预测
+                                score += Math.random() * 3;
+                                
+                                return score;
+                            });
+                            
+                            // 选择得分最高的移动
+                            const maxScore = Math.max(...scores);
+                            const bestMoves = validMoves.filter((_, i) => scores[i] === maxScore);
+                            selectedMove = bestMoves[Math.floor(Math.random() * bestMoves.length)];
+                        }
+                    }
+                    
+                    // 执行AI选择的移动
+                    if (selectedMove) {
+                        makeMove(selectedMove.layer, selectedMove.row, selectedMove.col);
+                    } else if (validMoves.length > 0) {
+                        // 如果未选择移动但存在合法移动，则随机选择一个
+                        selectedMove = validMoves[Math.floor(Math.random() * validMoves.length)];
+                        makeMove(selectedMove.layer, selectedMove.row, selectedMove.col);
+                    }
+                }, thinkTime);
+            }
+            
+            // 评估位置的价值
+            function evaluatePosition(layer, row, col, player) {
+                let score = 0;
+                
+                // 检查方向
+                const directions = [
+                    [0, 0, 1], [0, 1, 0], [0, 1, 1], [0, 1, -1],
+                    [1, 0, 0], [1, 1, 0], [1, -1, 0], [1, 0, 1],
+                    [1, 0, -1], [1, 1, 1], [1, 1, -1], [1, -1, 1],
+                    [1, -1, -1]
+                ];
+                
+                for (const [dl, dr, dc] of directions) {
+                    // 正向检查
+                    let count = 1; // 包括当前位置
+                    let l = layer + dl;
+                    let r = row + dr;
+                    let c = col + dc;
+                    
+                    while (l >= 0 && l < 4 && r >= 0 && r < 4 && c >= 0 && c < 4) {
+                        if (gameState.board[l][r][c] === player) {
+                            count++;
+                            l += dl;
+                            r += dr;
+                            c += dc;
+                        } else if (gameState.board[l][r][c] === 0) {
+                            break; // 空位，停止计数
+                        } else {
+                            count = 0; // 被对手阻挡
+                            break;
+                        }
+                    }
+                    
+                    // 反向检查
+                    l = layer - dl;
+                    r = row - dr;
+                    c = col - dc;
+                    
+                    while (l >= 0 && l < 4 && r >= 0 && r < 4 && c >= 0 && c < 4) {
+                        if (gameState.board[l][r][c] === player) {
+                            count++;
+                            l -= dl;
+                            r -= dr;
+                            c -= dc;
+                        } else if (gameState.board[l][r][c] === 0) {
+                            break; // 空位，停止计数
+                        } else {
+                            count = 0; // 被对手阻挡
+                            break;
+                        }
+                    }
+                    
+                    // 根据连续棋子数加分
+                    if (count >= 4) {
+                        score += 1000; // 获胜
+                    } else if (count === 3) {
+                        score += 100; // 三连
+                    } else if (count === 2) {
+                        score += 10; // 二连
+                    } else if (count === 1) {
+                        score += 1; // 单子
+                    }
+                }
+                
+                return score;
+            }
+            
+            // 切换游戏模式
+            function setGameMode(mode) {
+                gameState.gameMode = mode;
+                
+                // 更新按钮状态
+                document.getElementById('pvp-mode').classList.toggle('active', mode === 'pvp');
+                document.getElementById('pvc-mode').classList.toggle('active', mode === 'pvc');
+                
+                // 更新玩家名称
+                if (mode === 'pvp') {
+                    document.getElementById('player1-name').textContent = '玩家1';
+                    document.getElementById('player2-name').textContent = '玩家2';
+                } else {
+                    document.getElementById('player1-name').textContent = gameState.aiPlayer === 1 ? 'AI' : '你';
+                    document.getElementById('player2-name').textContent = gameState.aiPlayer === 2 ? 'AI' : '你';
+                }
+            }
+            
+            // 设置AI难度
+            function setAIDifficulty(difficulty) {
+                gameState.aiDifficulty = difficulty;
+                
+                // 更新按钮状态
+                document.getElementById('easy-diff').classList.toggle('active', difficulty === 'easy');
+                document.getElementById('medium-diff').classList.toggle('active', difficulty === 'medium');
+                document.getElementById('hard-diff').classList.toggle('active', difficulty === 'hard');
+            }
+            
+            // 设置玩家顺序
+            function setPlayerOrder(isAiFirst) {
+                gameState.aiPlayer = isAiFirst ? 1 : 2;
+                
+                // 更新UI
+                document.getElementById('ai-first').classList.toggle('active', isAiFirst);
+                document.getElementById('ai-second').classList.toggle('active', !isAiFirst);
+                
+                // 更新玩家名称
+                if (gameState.gameMode === 'pvc') {
+                    document.getElementById('player1-name').textContent = gameState.aiPlayer === 1 ? 'AI' : '你';
+                    document.getElementById('player2-name').textContent = gameState.aiPlayer === 2 ? 'AI' : '你';
+                }
+            }
+            
+            // 应用设置
+            function applySettings() {
+                // 获取当前设置
+                const isPvCMode = document.getElementById('pvc-mode').classList.contains('active');
+                const difficulty = document.getElementById('hard-diff').classList.contains('active') ? 'hard' : 
+                    document.getElementById('medium-diff').classList.contains('active') ? 'medium' : 'easy';
+                const isAiFirst = document.getElementById('ai-first').classList.contains('active');
+                
+                // 更新游戏状态
+                setGameMode(isPvCMode ? 'pvc' : 'pvp');
+                setAIDifficulty(difficulty);
+                setPlayerOrder(isAiFirst);
+                
+                // 关闭设置弹窗
+                document.getElementById('settings-modal').classList.remove('active');
+                
+                // 重新开始游戏
+                restartGame();
             }
             
             // 事件监听
             document.getElementById('restart').addEventListener('click', restartGame);
             document.getElementById('undo').addEventListener('click', undoMove);
             document.getElementById('reset-view').addEventListener('click', reset3DView);
-            document.getElementById('show-rules').addEventListener('click', toggleRulesModal);
-            document.getElementById('close-rules').addEventListener('click', toggleRulesModal);
+            document.getElementById('show-rules').addEventListener('click', () => {
+                document.getElementById('rules-modal').classList.add('active');
+            });
+            document.getElementById('close-rules').addEventListener('click', () => {
+                document.getElementById('rules-modal').classList.remove('active');
+            });
+            document.getElementById('close-rules-btn').addEventListener('click', () => {
+                document.getElementById('rules-modal').classList.remove('active');
+            });
+            
+            // 设置按钮
+            document.getElementById('settings-btn').addEventListener('click', () => {
+                document.getElementById('settings-modal').classList.add('active');
+            });
+            document.getElementById('close-settings').addEventListener('click', () => {
+                document.getElementById('settings-modal').classList.remove('active');
+            });
+            document.getElementById('apply-settings').addEventListener('click', applySettings);
+            
+            // 模式选择
+            document.getElementById('pvp-mode').addEventListener('click', () => {
+                document.getElementById('pvp-mode').classList.add('active');
+                document.getElementById('pvc-mode').classList.remove('active');
+            });
+            document.getElementById('pvc-mode').addEventListener('click', () => {
+                document.getElementById('pvc-mode').classList.add('active');
+                document.getElementById('pvp-mode').classList.remove('active');
+            });
+            
+            // 难度选择
+            document.getElementById('easy-diff').addEventListener('click', () => {
+                document.getElementById('easy-diff').classList.add('active');
+                document.getElementById('medium-diff').classList.remove('active');
+                document.getElementById('hard-diff').classList.remove('active');
+            });
+            document.getElementById('medium-diff').addEventListener('click', () => {
+                document.getElementById('medium-diff').classList.add('active');
+                document.getElementById('easy-diff').classList.remove('active');
+                document.getElementById('hard-diff').classList.remove('active');
+            });
+            document.getElementById('hard-diff').addEventListener('click', () => {
+                document.getElementById('hard-diff').classList.add('active');
+                document.getElementById('easy-diff').classList.remove('active');
+                document.getElementById('medium-diff').classList.remove('active');
+            });
+            
+            // 玩家顺序
+            document.getElementById('ai-first').addEventListener('click', () => {
+                setPlayerOrder(true);
+            });
+            document.getElementById('ai-second').addEventListener('click', () => {
+                setPlayerOrder(false);
+            });
             
             // 初始化游戏
             initBoard();
