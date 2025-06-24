@@ -38,29 +38,6 @@
             position: relative;
         }
         
-        .logo {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        
-        .logo-icon {
-            width: 40px;
-            height: 40px;
-            background: linear-gradient(135deg, #00c9ff, #92fe9d);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            font-size: 20px;
-        }
-        
-        .cube-icon {
-            font-size: 24px;
-            color: white;
-        }
-        
         .game-title {
             font-size: 1.2rem;
             background: linear-gradient(to right, #00c9ff, #92fe9d);
@@ -410,6 +387,10 @@
         .setting-group {
             margin-bottom: 15px;
         }
+
+        .hidden {
+            display: none;
+        }
         
         .setting-title {
             font-size: 1.1rem;
@@ -433,7 +414,7 @@
             font-size: 0.9rem;
             cursor: pointer;
             transition: all 0.3s;
-            min-width: 100px;
+            min-width: 80px;
             text-align: center;
         }
         
@@ -602,15 +583,6 @@
     <!-- 顶部标题栏 -->
     <div class="header-container">
         <div class="logo">
-            <div class="logo-icon">
-                <svg class="cube-svg" viewBox="0 0 24 24">
-                    <path d="M3,3 L21,3 L21,21 L3,21 Z" />
-                    <path d="M3,3 L12,12" />
-                    <path d="M21,3 L12,12" />
-                    <path d="M21,21 L12,12" />
-                    <path d="M3,21 L12,12" />
-                </svg>
-            </div>
             <h1 class="game-title">立体四子棋</h1>
         </div>
         
@@ -685,11 +657,11 @@
     <!-- 设置弹窗 -->
     <div class="modal" id="settings-modal">
         <div class="modal-content">
-            <div class="close-btn" id="close-settings">×</div>
+            <div class="close-btn hidden" id="close-settings">×</div>
             <h2 class="modal-title">游戏设置</h2>
             
             <div class="settings-section">
-                <div class="setting-group">
+                <div id="mode-setting" class="setting-group">
                     <h3 class="setting-title">游戏模式</h3>
                     <div class="options-container">
                         <div class="option-btn active" id="pvp-mode">双人对战</div>
@@ -697,7 +669,7 @@
                     </div>
                 </div>
                 
-                <div class="setting-group">
+                <div id="ai-diff-setting" class="setting-group hidden">
                     <h3 class="setting-title">AI难度</h3>
                     <div class="options-container">
                         <div class="option-btn diff-btn" id="easy-diff">简单</div>
@@ -706,7 +678,7 @@
                     </div>
                 </div>
                 
-                <div class="setting-group">
+                <div id="player-order-setting" class="setting-group hidden">
                     <h3 class="setting-title">玩家顺序</h3>
                     <div class="player-order">
                         <div class="order-option active" id="ai-second">
@@ -722,7 +694,7 @@
             </div>
             
             <button class="option-btn" id="apply-settings" style="width: 100%; margin-top: 20px;">
-                应用设置
+                开始挑战
             </button>
         </div>
     </div>
@@ -742,10 +714,6 @@
                 <li>第一步棋不计时，从第二步开始计时</li>
                 <li><strong>人机模式</strong>: AI将自动下棋，可选择不同难度</li>
             </ul>
-            
-            <button class="option-btn" id="close-rules-btn" style="width: 100%;">
-                关闭
-            </button>
         </div>
     </div>
     
@@ -1535,7 +1503,7 @@
                                 score += evaluatePosition(move.layer, move.row, move.col, gameState.aiPlayer);
                                 
                                 // 考虑对手的威胁，但权重较低
-                                score -= evaluatePosition(move.layer, move.row, move.col, opponent) * 0.5;
+                                score -= evaluatePosition(move.layer, move.row, move.col, opponent) * 0.7;
                                 
                                 // 随机性，避免AI行为过于可预测
                                 score += Math.random() * 3;
@@ -1700,8 +1668,14 @@
                     document.getElementById('player1-name').textContent = '玩家1';
                     document.getElementById('player2-name').textContent = '玩家2';
                 } else {
-                    document.getElementById('player1-name').textContent = gameState.aiPlayer === 1 ? 'AI' : '你';
-                    document.getElementById('player2-name').textContent = gameState.aiPlayer === 2 ? 'AI' : '你';
+                    const aiDifficulty = {
+                        easy: '简单',
+                        medium: '中等',
+                        hard: '困难'
+                    }[gameState.aiDifficulty]
+                    console.log(aiDifficulty)
+                    document.getElementById('player1-name').textContent = gameState.aiPlayer === 1 ? (aiDifficulty + 'AI') : '你';
+                    document.getElementById('player2-name').textContent = gameState.aiPlayer === 2 ? (aiDifficulty + 'AI') : '你';
                 }
             }
             
@@ -1717,6 +1691,11 @@
             
             // 设置玩家顺序
             function setPlayerOrder(isAiFirst) {
+                                    const aiDifficulty = {
+                        easy: '简单',
+                        medium: '中等',
+                        hard: '困难'
+                    }[gameState.aiDifficulty]
                 gameState.aiPlayer = isAiFirst ? 1 : 2;
                 
                 // 更新UI
@@ -1725,8 +1704,8 @@
                 
                 // 更新玩家名称
                 if (gameState.gameMode === 'pvc') {
-                    document.getElementById('player1-name').textContent = gameState.aiPlayer === 1 ? 'AI' : '你';
-                    document.getElementById('player2-name').textContent = gameState.aiPlayer === 2 ? 'AI' : '你';
+                    document.getElementById('player1-name').textContent = gameState.aiPlayer === 1 ? (aiDifficulty + 'AI') : '你';
+                    document.getElementById('player2-name').textContent = gameState.aiPlayer === 2 ? (aiDifficulty + 'AI') : '你';
                 }
             }
             
@@ -1748,6 +1727,10 @@
                 
                 // 重新开始游戏
                 restartGame();
+
+                setTimeout(() => {
+                    document.getElementById('close-settings').classList.remove('hidden');
+                }, 1000);
             }
             
             // 事件监听
@@ -1758,9 +1741,6 @@
                 document.getElementById('rules-modal').classList.add('active');
             });
             document.getElementById('close-rules').addEventListener('click', () => {
-                document.getElementById('rules-modal').classList.remove('active');
-            });
-            document.getElementById('close-rules-btn').addEventListener('click', () => {
                 document.getElementById('rules-modal').classList.remove('active');
             });
             
@@ -1777,10 +1757,14 @@
             document.getElementById('pvp-mode').addEventListener('click', () => {
                 document.getElementById('pvp-mode').classList.add('active');
                 document.getElementById('pvc-mode').classList.remove('active');
+                document.getElementById('ai-diff-setting').classList.add('hidden');
+                document.getElementById('player-order-setting').classList.add('hidden');
             });
             document.getElementById('pvc-mode').addEventListener('click', () => {
                 document.getElementById('pvc-mode').classList.add('active');
                 document.getElementById('pvp-mode').classList.remove('active');
+                document.getElementById('ai-diff-setting').classList.remove('hidden');
+                document.getElementById('player-order-setting').classList.remove('hidden');
             });
             
             // 难度选择
@@ -1811,6 +1795,7 @@
             // 初始化游戏
             initBoard();
             initThreeJS();
+            document.getElementById('settings-modal').classList.add('active');
         });
     </script>
 </body>
