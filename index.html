@@ -3,6 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
+    <meta name="author" content="Hower Lin">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>立体四子棋</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
@@ -14,6 +15,7 @@
             margin: 0;
             padding: 0;
             touch-action: manipulation;
+            user-select: none;
         }
 
         body {
@@ -1220,7 +1222,7 @@
                     gameState.winningPieces = winInfo.winningPieces;
                     document.getElementById('status').textContent =
                         gameState.gameMode === 'pvp' ? `玩家${gameState.currentPlayer}获胜！` :
-                            gameState.currentPlayer === gameState.aiPlayer ? 'AI获胜！' : '你赢了！';
+                            `${gameState.currentPlayer === gameState.aiPlayer ? 'AI' : '玩家'}获胜！`;
                     highlightWinningPieces(winInfo.winningPieces);
                     highlight2DWinningPieces();
                     updateStatusStyle();
@@ -1255,7 +1257,7 @@
                     if (gameState.currentPlayer === gameState.aiPlayer) {
                         document.getElementById('status').textContent = 'AI思考中...';
                     } else {
-                        document.getElementById('status').textContent = '你的回合';
+                        document.getElementById('status').textContent = '玩家回合';
                     }
                 }
 
@@ -1457,7 +1459,7 @@
                     if (gameState.currentPlayer === gameState.aiPlayer) {
                         document.getElementById('status').textContent = 'AI思考中...';
                     } else {
-                        document.getElementById('status').textContent = '你的回合';
+                        document.getElementById('status').textContent = '玩家回合';
                     }
                 }
                 updateStatusStyle();
@@ -1495,7 +1497,7 @@
                 document.querySelectorAll('.marker').forEach(marker => marker.remove());
                 document.getElementById('status').textContent =
                     gameState.gameMode === 'pvp' ? '玩家1回合' :
-                        gameState.aiPlayer === 1 ? 'AI思考中...' : '你的回合';
+                        gameState.aiPlayer === 1 ? 'AI思考中...' : '玩家回合';
                 updateTimerDisplay();
                 updateStatusStyle();
 
@@ -1888,8 +1890,8 @@
                         medium: '中等',
                         hard: '困难'
                     }[gameState.aiDifficulty]
-                    document.getElementById('player1-name').textContent = gameState.aiPlayer === 1 ? (aiDifficulty + 'AI') : '你';
-                    document.getElementById('player2-name').textContent = gameState.aiPlayer === 2 ? (aiDifficulty + 'AI') : '你';
+                    document.getElementById('player1-name').textContent = gameState.aiPlayer === 1 ? (aiDifficulty + 'AI') : '玩家';
+                    document.getElementById('player2-name').textContent = gameState.aiPlayer === 2 ? (aiDifficulty + 'AI') : '玩家';
                 }
             }
 
@@ -1918,8 +1920,8 @@
 
                 // 更新玩家名称
                 if (gameState.gameMode === 'pvc') {
-                    document.getElementById('player1-name').textContent = gameState.aiPlayer === 1 ? (aiDifficulty + 'AI') : '你';
-                    document.getElementById('player2-name').textContent = gameState.aiPlayer === 2 ? (aiDifficulty + 'AI') : '你';
+                    document.getElementById('player1-name').textContent = gameState.aiPlayer === 1 ? (aiDifficulty + 'AI') : '玩家';
+                    document.getElementById('player2-name').textContent = gameState.aiPlayer === 2 ? (aiDifficulty + 'AI') : '玩家';
                 }
             }
 
