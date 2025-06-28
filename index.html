@@ -284,7 +284,7 @@
 
         .winning-piece {
             animation: pulse 1.5s infinite;
-            box-shadow: 0 0 8px gold, 0 0 15px gold;
+            box-shadow: 0 0 8px #4caf50, 0 0 15px #4caf50;
         }
 
         @keyframes pulse {
@@ -828,7 +828,14 @@
                 // 创建相机
                 const container = document.getElementById('three-container');
                 camera = new THREE.PerspectiveCamera(60, container.clientWidth / container.clientHeight, 0.1, 1000);
-                camera.position.set(6, 6, 6);
+                
+                // 根据设备类型调整相机初始位置
+                if (window.innerWidth <= 767) { // 移动端
+                    camera.position.set(3, 4, 5);
+                } else { // 桌面端
+                    camera.position.set(6, 6, 6);
+                }
+                
                 camera.lookAt(0, 0, 0);
 
                 // 保存初始相机位置
@@ -846,6 +853,10 @@
                 controls.dampingFactor = 0.05;
                 controls.enableZoom = true;
                 controls.enablePan = false;
+                
+                // 设置缩放限制
+                controls.minDistance = 4;  // 最小缩放距离
+                controls.maxDistance = 15; // 最大缩放距离
 
                 // 创建棋盘框架
                 createBoardFrame();
@@ -942,7 +953,7 @@
                     );
 
                     if (piece) {
-                        piece.material.emissive.setHex(0xffff00);
+                        piece.material.emissive.setHex(0x00ff00);
                         piece.material.needsUpdate = true;
                     }
                 });
@@ -1209,7 +1220,9 @@
                     document.querySelectorAll('.placed').forEach(piece => {
                         piece.classList.remove('player-color');
                     });
-                    piece.classList.add('player-color');
+                    if (!gameState.gameOver) {
+                        piece.classList.add('player-color');
+                    }
                 }, 10);
 
                 // 添加3D棋子
@@ -1857,8 +1870,6 @@
                         case 'hard':
                             selectedMove = hardAIMove(validMoves);
                             break;
-                        default:
-                            selectedMove = validMoves[Math.floor(Math.random() * validMoves.length)];
                     }
 
                     // 执行AI选择的移动
