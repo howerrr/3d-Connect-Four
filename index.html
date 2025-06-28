@@ -527,7 +527,8 @@
             pointer-events: none;
         }
 
-        .marker::before, .marker::after {
+        .marker::before,
+        .marker::after {
             content: '';
             position: absolute;
             background-color: currentColor;
@@ -559,7 +560,7 @@
             stroke: #fff;
             stroke-width: 2;
         }
-        
+
         /* 响应式调整 - 电脑端 */
         @media (min-width: 768px) {
             .game-container {
@@ -769,16 +770,10 @@
             <div class="close-btn" id="close-rules">×</div>
             <h2 class="modal-title">游戏规则</h2>
             <ul class="rules-list">
-                <li>两个玩家轮流在4×4×4的立方体网格中放置棋子</li>
-                <li>第一层（底层）可以直接放置棋子</li>
-                <li>其他层放置棋子时，正下方位置必须有棋子支撑</li>
-                <li>在任意方向（横、竖、斜）连成四子即可获胜</li>
-                <li>获胜方向包括：水平线、垂直线、对角线、空间对角线</li>
-                <li>点击网格放置棋子，使用3D视图查看棋盘</li>
-                <li>第一步棋不计时，从第二步开始计时</li>
-                <li><strong>人机模式</strong>: AI将自动下棋，可选择不同难度</li>
-                <li><strong>右键点击</strong>: 添加/移除标记</li>
-                <li><strong>长按(移动端)</strong>: 添加/移除标记</li>
+                <li>两个玩家轮流在4×4×4的立方体网格中放置棋子，可使用3D视图查看棋盘</li>
+                <li>第一层（底层）可以直接放置棋子，其他层放置棋子时，正下方位置必须有棋子支撑</li>
+                <li>在任意方向（横、竖、斜）连成四子即可获胜，获胜方向包括：水平线、垂直线、对角线、空间对角线</li>
+                <li>右键点击(网页端)或长按(移动端): 添加/移除标记</li>
             </ul>
         </div>
     </div>
@@ -991,13 +986,13 @@
 
                             // 添加点击事件
                             cell.addEventListener('click', () => makeMove(layer, row, col));
-                            
+
                             // 添加右键事件（标记）
                             cell.addEventListener('contextmenu', (e) => {
                                 e.preventDefault();
                                 toggleMarker(layer, row, col);
                             });
-                            
+
                             // 移动端长按事件
                             let longPressTimer;
                             cell.addEventListener('touchstart', (e) => {
@@ -1006,11 +1001,11 @@
                                     e.preventDefault();
                                 }, 500);
                             });
-                            
+
                             cell.addEventListener('touchend', () => {
                                 clearTimeout(longPressTimer);
                             });
-                            
+
                             cell.addEventListener('touchmove', () => {
                                 clearTimeout(longPressTimer);
                             });
@@ -1020,13 +1015,13 @@
                     }
                 }
             }
-            
+
             // 切换标记
             function toggleMarker(layer, row, col) {
                 if (gameState.board[layer][row][col] !== 0 || gameState.isAiThinking) return; // 已有棋子不能标记
-                
+
                 const cell = document.querySelector(`.cell[data-layer="${layer}"][data-row="${row}"][data-col="${col}"]`);
-                
+
                 // 如果已有标记，则移除
                 const existingMarker = cell.querySelector('.marker');
                 if (existingMarker) {
@@ -1034,7 +1029,7 @@
                     gameState.markers[layer][row][col] = 0;
                     return;
                 }
-                
+
                 // 添加新标记
                 const marker = document.createElement('div');
                 marker.className = `marker player${gameState.currentPlayer}`;
@@ -1400,7 +1395,7 @@
                         piece.classList.remove('winning-piece');
                     });
                     gameState.gameOver = false;
-                    
+
                     // 如果是双人对战，则多撤回一步，让败方重下
                     if (gameState.gameMode === 'pvp') {
                         undoMove();
@@ -1431,10 +1426,10 @@
                 gameState.currentPlayer = lastMove.player;
 
                 // 人机模式特殊处理：如果当前是AI回合，再撤一步（撤回AI的移动）
-                if (gameState.gameMode === 'pvc' && 
-                    gameState.currentPlayer === gameState.aiPlayer && 
+                if (gameState.gameMode === 'pvc' &&
+                    gameState.currentPlayer === gameState.aiPlayer &&
                     gameState.moveHistory.length > 0) {
-                    
+
                     const aiMove = gameState.moveHistory.pop();
                     gameState.board[aiMove.layer][aiMove.row][aiMove.col] = 0;
 
@@ -1524,20 +1519,20 @@
 
             // 获取所有合法移动
             function getValidMoves() {
-                    const validMoves = [];
-                    for (let layer = 0; layer < 4; layer++) {
-                        for (let row = 0; row < 4; row++) {
-                            for (let col = 0; col < 4; col++) {
-                                // 检查位置是否为空
-                                if (gameState.board[layer][row][col] !== 0) continue;
+                const validMoves = [];
+                for (let layer = 0; layer < 4; layer++) {
+                    for (let row = 0; row < 4; row++) {
+                        for (let col = 0; col < 4; col++) {
+                            // 检查位置是否为空
+                            if (gameState.board[layer][row][col] !== 0) continue;
 
-                                // 检查下方是否有支撑（第一层除外）
-                                if (layer === 0 || gameState.board[layer - 1][row][col] !== 0) {
-                                    validMoves.push({ layer, row, col });
-                                }
+                            // 检查下方是否有支撑（第一层除外）
+                            if (layer === 0 || gameState.board[layer - 1][row][col] !== 0) {
+                                validMoves.push({ layer, row, col });
                             }
                         }
                     }
+                }
                 return validMoves;
             }
 
@@ -1634,92 +1629,92 @@
 
             // 简单难度的AI
             function easyAIMove(validMoves) {
-                        // 1. 检查AI是否可以立即获胜
-                        for (const move of validMoves) {
-                            gameState.board[move.layer][move.row][move.col] = gameState.aiPlayer;
-                            if (checkWin(move.layer, move.row, move.col).win) {
-                                gameState.board[move.layer][move.row][move.col] = 0;
+                // 1. 检查AI是否可以立即获胜
+                for (const move of validMoves) {
+                    gameState.board[move.layer][move.row][move.col] = gameState.aiPlayer;
+                    if (checkWin(move.layer, move.row, move.col).win) {
+                        gameState.board[move.layer][move.row][move.col] = 0;
                         return move;
-                            }
-                            gameState.board[move.layer][move.row][move.col] = 0;
-                        }
+                    }
+                    gameState.board[move.layer][move.row][move.col] = 0;
+                }
 
-                        // 2. 检查玩家是否可以获胜（需要阻止）
-                            for (const move of validMoves) {
+                // 2. 检查玩家是否可以获胜（需要阻止）
+                for (const move of validMoves) {
                     gameState.board[move.layer][move.row][move.col] = gameState.aiPlayer === 1 ? 2 : 1;
-                                if (checkWin(move.layer, move.row, move.col).win) {
-                                    gameState.board[move.layer][move.row][move.col] = 0;
+                    if (checkWin(move.layer, move.row, move.col).win) {
+                        gameState.board[move.layer][move.row][move.col] = 0;
                         return move;
-                                }
-                                gameState.board[move.layer][move.row][move.col] = 0;
-                        }
+                    }
+                    gameState.board[move.layer][move.row][move.col] = 0;
+                }
 
-                        // 3. 策略性选择（中心位置优先）
-                            const movesWithScores = validMoves.map(move => {
-                                // 中心位置得分高
-                                const centerDist =
-                                    Math.abs(move.row - 1.5) +
-                                    Math.abs(move.col - 1.5) +
-                                    Math.abs(move.layer - 1.5);
-                                const score = 10 - centerDist;
+                // 3. 策略性选择（中心位置优先）
+                const movesWithScores = validMoves.map(move => {
+                    // 中心位置得分高
+                    const centerDist =
+                        Math.abs(move.row - 1.5) +
+                        Math.abs(move.col - 1.5) +
+                        Math.abs(move.layer - 1.5);
+                    const score = 10 - centerDist;
 
-                                // 增加随机性
+                    // 增加随机性
                     const randomFactor = Math.random() * 5;
 
-                                return { move, score: score + randomFactor };
-                            });
+                    return { move, score: score + randomFactor };
+                });
 
-                            // 按分数排序
-                            movesWithScores.sort((a, b) => b.score - a.score);
+                // 按分数排序
+                movesWithScores.sort((a, b) => b.score - a.score);
 
                 // 选择分数最高的移动
                 return movesWithScores[0].move;
-                        }
+            }
 
             // 中等难度的AI
             function mediumAIMove(validMoves) {
-                        // 1. 检查AI是否可以立即获胜
-                        for (const move of validMoves) {
-                            gameState.board[move.layer][move.row][move.col] = gameState.aiPlayer;
-                            if (checkWin(move.layer, move.row, move.col).win) {
-                                gameState.board[move.layer][move.row][move.col] = 0;
+                // 1. 检查AI是否可以立即获胜
+                for (const move of validMoves) {
+                    gameState.board[move.layer][move.row][move.col] = gameState.aiPlayer;
+                    if (checkWin(move.layer, move.row, move.col).win) {
+                        gameState.board[move.layer][move.row][move.col] = 0;
                         return move;
-                            }
-                            gameState.board[move.layer][move.row][move.col] = 0;
-                        }
+                    }
+                    gameState.board[move.layer][move.row][move.col] = 0;
+                }
 
-                            // 2. 检查玩家是否可以获胜（需要阻止）
-                            for (const move of validMoves) {
+                // 2. 检查玩家是否可以获胜（需要阻止）
+                for (const move of validMoves) {
                     gameState.board[move.layer][move.row][move.col] = gameState.aiPlayer === 1 ? 2 : 1;
-                                if (checkWin(move.layer, move.row, move.col).win) {
-                                    gameState.board[move.layer][move.row][move.col] = 0;
+                    if (checkWin(move.layer, move.row, move.col).win) {
+                        gameState.board[move.layer][move.row][move.col] = 0;
                         return move;
-                                }
-                                gameState.board[move.layer][move.row][move.col] = 0;
-                        }
+                    }
+                    gameState.board[move.layer][move.row][move.col] = 0;
+                }
 
-                            // 3. 策略性选择
+                // 3. 策略性选择
                 const movesWithScores = validMoves.map(move => {
-                                let score = 0;
+                    let score = 0;
 
-                                // 位置权重：中心位置得分更高
-                                const centerDist =
-                                    Math.abs(move.row - 1.5) +
-                                    Math.abs(move.col - 1.5) +
-                                    Math.abs(move.layer - 1.5);
-                                score += (6 - centerDist) * 2;
+                    // 位置权重：中心位置得分更高
+                    const centerDist =
+                        Math.abs(move.row - 1.5) +
+                        Math.abs(move.col - 1.5) +
+                        Math.abs(move.layer - 1.5);
+                    score += (6 - centerDist) * 2;
 
-                                // 检查该位置是否可以形成连线
-                                score += evaluatePosition(move.layer, move.row, move.col, gameState.aiPlayer);
+                    // 检查该位置是否可以形成连线
+                    score += evaluatePosition(move.layer, move.row, move.col, gameState.aiPlayer);
 
-                                // 考虑对手的威胁，但权重较低
+                    // 考虑对手的威胁，但权重较低
                     score -= evaluatePosition(move.layer, move.row, move.col, gameState.aiPlayer === 1 ? 2 : 1) * 0.7;
 
-                                // 随机性，避免AI行为过于可预测
-                                score += Math.random() * 3;
+                    // 随机性，避免AI行为过于可预测
+                    score += Math.random() * 3;
 
                     return { move, score };
-                            });
+                });
 
                 // 按分数排序
                 movesWithScores.sort((a, b) => b.score - a.score);
@@ -1734,35 +1729,35 @@
                 let bestScore = -Infinity;
                 let bestMove = null;
 
-                        // 1. 检查AI是否可以立即获胜
-                        for (const move of validMoves) {
-                            gameState.board[move.layer][move.row][move.col] = gameState.aiPlayer;
-                            if (checkWin(move.layer, move.row, move.col).win) {
-                                gameState.board[move.layer][move.row][move.col] = 0;
+                // 1. 检查AI是否可以立即获胜
+                for (const move of validMoves) {
+                    gameState.board[move.layer][move.row][move.col] = gameState.aiPlayer;
+                    if (checkWin(move.layer, move.row, move.col).win) {
+                        gameState.board[move.layer][move.row][move.col] = 0;
                         return move;
-                            }
-                            gameState.board[move.layer][move.row][move.col] = 0;
-                        }
+                    }
+                    gameState.board[move.layer][move.row][move.col] = 0;
+                }
 
                 // 2. 检查玩家是否可以立即获胜
-                            for (const move of validMoves) {
-                                gameState.board[move.layer][move.row][move.col] = opponent;
-                                if (checkWin(move.layer, move.row, move.col).win) {
-                                    gameState.board[move.layer][move.row][move.col] = 0;
+                for (const move of validMoves) {
+                    gameState.board[move.layer][move.row][move.col] = opponent;
+                    if (checkWin(move.layer, move.row, move.col).win) {
+                        gameState.board[move.layer][move.row][move.col] = 0;
                         return move;
-                                }
-                                gameState.board[move.layer][move.row][move.col] = 0;
-                            }
+                    }
+                    gameState.board[move.layer][move.row][move.col] = 0;
+                }
 
                 // 3. 使用Minimax算法选择最佳移动
                 for (const move of validMoves) {
                     // 模拟AI移动
                     gameState.board[move.layer][move.row][move.col] = gameState.aiPlayer;
-                    
+
                     // 获取对手的合法移动
                     const opponentMoves = getValidMoves();
                     let minScore = Infinity;
-                    
+
                     for (const oppMove of opponentMoves) {
                         // 模拟对手移动
                         gameState.board[oppMove.layer][oppMove.row][oppMove.col] = opponent;
@@ -1772,22 +1767,22 @@
 
                         // 恢复对手移动
                         gameState.board[oppMove.layer][oppMove.row][oppMove.col] = 0;
-                        
+
                         if (score < minScore) {
                             minScore = score;
                         }
                     }
-                    
+
                     // 恢复AI移动
                     gameState.board[move.layer][move.row][move.col] = 0;
-                    
+
                     // 如果这个移动的最小分数比当前最佳分数高，则更新
                     if (minScore > bestScore) {
                         bestScore = minScore;
                         bestMove = move;
                     }
                 }
-                
+
                 return bestMove || validMoves[Math.floor(Math.random() * validMoves.length)];
             }
 
@@ -1801,7 +1796,7 @@
 
                 // 计算当前棋盘上的棋子数量
                 const moveCount = gameState.moveHistory.length;
-                
+
                 // 基础思考时间
                 let baseThinkTime;
                 switch (gameState.aiDifficulty) {
@@ -1817,17 +1812,17 @@
                     default:
                         baseThinkTime = 900;
                 }
-                
+
                 // 根据棋子数量动态调整思考时间
                 let dynamicFactor = 1 + moveCount * 0.1; // 每增加一步思考时间增加10%
                 dynamicFactor = Math.min(dynamicFactor, 2.5); // 最大不超过2.5倍
-                
+
                 // 添加随机性，避免过于机械
                 const randomFactor = 0.8 + Math.random() * 0.4; // 0.8-1.2之间的随机数
-                
+
                 // 最终思考时间 = 基础时间 × 动态因子 × 随机因子
                 const thinkTime = baseThinkTime * dynamicFactor * randomFactor;
-                
+
                 // 确保思考时间在合理范围内
                 const minTime = 300; // 最小300ms
                 const maxTime = 3500; // 最大3500ms
