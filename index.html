@@ -1023,7 +1023,7 @@
             
             // 切换标记
             function toggleMarker(layer, row, col) {
-                if (gameState.board[layer][row][col] !== 0) return; // 已有棋子不能标记
+                if (gameState.board[layer][row][col] !== 0 || gameState.isAiThinking) return; // 已有棋子不能标记
                 
                 const cell = document.querySelector(`.cell[data-layer="${layer}"][data-row="${row}"][data-col="${col}"]`);
                 
@@ -1799,21 +1799,39 @@
                 document.getElementById('status').textContent = 'AI思考中...';
                 updateStatusStyle();
 
-                // 根据难度设置思考时间
-                let thinkTime;
+                // 计算当前棋盘上的棋子数量
+                const moveCount = gameState.moveHistory.length;
+                
+                // 基础思考时间
+                let baseThinkTime;
                 switch (gameState.aiDifficulty) {
                     case 'easy':
-                        thinkTime = 800 + Math.random() * 700;
-                            break;
+                        baseThinkTime = 600;
+                        break;
                     case 'medium':
-                        thinkTime = 1200 + Math.random() * 800;
+                        baseThinkTime = 900;
                         break;
                     case 'hard':
-                        thinkTime = 1600 + Math.random() * 1000;
+                        baseThinkTime = 1200;
                         break;
                     default:
-                        thinkTime = 1200;
+                        baseThinkTime = 900;
                 }
+                
+                // 根据棋子数量动态调整思考时间
+                let dynamicFactor = 1 + moveCount * 0.1; // 每增加一步思考时间增加10%
+                dynamicFactor = Math.min(dynamicFactor, 2.5); // 最大不超过2.5倍
+                
+                // 添加随机性，避免过于机械
+                const randomFactor = 0.8 + Math.random() * 0.4; // 0.8-1.2之间的随机数
+                
+                // 最终思考时间 = 基础时间 × 动态因子 × 随机因子
+                const thinkTime = baseThinkTime * dynamicFactor * randomFactor;
+                
+                // 确保思考时间在合理范围内
+                const minTime = 300; // 最小300ms
+                const maxTime = 3500; // 最大3500ms
+                const clampedThinkTime = Math.max(minTime, Math.min(maxTime, thinkTime));
 
                 setTimeout(() => {
                     if (gameState.gameOver || gameState.currentPlayer !== gameState.aiPlayer) {
@@ -1854,7 +1872,7 @@
                         selectedMove = validMoves[Math.floor(Math.random() * validMoves.length)];
                         makeMove(selectedMove.layer, selectedMove.row, selectedMove.col);
                     }
-                }, thinkTime);
+                }, clampedThinkTime);
             }
 
             // 切换游戏模式
