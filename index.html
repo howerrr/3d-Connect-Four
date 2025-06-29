@@ -15,9 +15,12 @@
             margin: 0;
             padding: 0;
             touch-action: manipulation;
-            -webkit-user-select: none; /* Safari/Chrome */
-            -moz-user-select: none; /* Firefox */
-            -ms-user-select: none; /* IE10+ */
+            -webkit-user-select: none;
+            /* Safari/Chrome */
+            -moz-user-select: none;
+            /* Firefox */
+            -ms-user-select: none;
+            /* IE10+ */
             user-select: none;
         }
 
@@ -1000,8 +1003,18 @@
                             cell.dataset.row = row;
                             cell.dataset.col = col;
 
+                            // 添加自定义属性跟踪长按状态
+                            cell.dataset.longPressTriggered = 'false';
+
                             // 添加点击事件
-                            cell.addEventListener('click', () => makeMove(layer, row, col));
+                            cell.addEventListener('click', (e) => {
+                                // 检查是否由长按触发
+                                if (cell.dataset.longPressTriggered === 'true') {
+                                    cell.dataset.longPressTriggered = 'false';
+                                    return;
+                                }
+                                makeMove(layer, row, col);
+                            });
 
                             // 添加右键事件（标记）
                             cell.addEventListener('contextmenu', (e) => {
@@ -1009,21 +1022,36 @@
                                 toggleMarker(layer, row, col);
                             });
 
-                            // 移动端长按事件
-                            let longPressTimer;
-                            cell.addEventListener('touchstart', (e) => {
-                                longPressTimer = setTimeout(() => {
-                                    toggleMarker(layer, row, col);
-                                    e.preventDefault();
-                                }, 500);
-                            });
+                            // 移动端触摸事件
+                            let touchStartTime;
+                            let touchMoved = false;
 
-                            cell.addEventListener('touchend', () => {
-                                clearTimeout(longPressTimer);
+                            cell.addEventListener('touchstart', (e) => {
+                                touchStartTime = Date.now();
+                                touchMoved = false;
+                                cell.dataset.longPressTriggered = 'false';
+
+                                // 设置定时器检测长按
+                                cell.longPressTimer = setTimeout(() => {
+                                    if (!touchMoved) {
+                                        toggleMarker(layer, row, col);
+                                        cell.dataset.longPressTriggered = 'true';
+                                    }
+                                }, 500); // 500ms长按时间
                             });
 
                             cell.addEventListener('touchmove', () => {
-                                clearTimeout(longPressTimer);
+                                touchMoved = true;
+                                clearTimeout(cell.longPressTimer);
+                            });
+
+                            cell.addEventListener('touchend', (e) => {
+                                clearTimeout(cell.longPressTimer);
+
+                                // 如果是短按且未移动，可能触发点击事件
+                                if (!touchMoved && Date.now() - touchStartTime < 500) {
+                                    // 短按处理 - 由点击事件处理
+                                }
                             });
 
                             layerElement.appendChild(cell);
@@ -1673,13 +1701,13 @@
 
                 // 2. 检查玩家是否可以获胜（需要阻止）
                 for (const move of validMoves) {
-                        gameState.board[move.layer][move.row][move.col] = gameState.aiPlayer === 1 ? 2 : 1;
-                        if (checkWin(move.layer, move.row, move.col).win) {
-                            gameState.board[move.layer][move.row][move.col] = 0;
-                            return move;
-                        }
+                    gameState.board[move.layer][move.row][move.col] = gameState.aiPlayer === 1 ? 2 : 1;
+                    if (checkWin(move.layer, move.row, move.col).win) {
                         gameState.board[move.layer][move.row][move.col] = 0;
+                        return move;
                     }
+                    gameState.board[move.layer][move.row][move.col] = 0;
+                }
 
                 // 3. 策略性选择（中心位置优先）
                 const movesWithScores = validMoves.map(move => {
