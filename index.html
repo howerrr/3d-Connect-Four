@@ -15,6 +15,9 @@
             margin: 0;
             padding: 0;
             touch-action: manipulation;
+            -webkit-user-select: none; /* Safari/Chrome */
+            -moz-user-select: none; /* Firefox */
+            -ms-user-select: none; /* IE10+ */
             user-select: none;
         }
 
@@ -90,7 +93,7 @@
             background: rgba(30, 41, 59, 0.7);
             border-radius: 12px;
             padding: 10px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 0 16px rgba(0, 0, 0, 0.3);
         }
 
         .player-indicator {
@@ -1137,23 +1140,37 @@
                 );
 
                 if (gameState.isAiThinking) {
-                    statusElement.classList.add('ai-thinking');
+                    updateBarAndText('ai-thinking');
                     return;
                 }
 
                 if (gameState.gameOver) {
                     if (statusElement.textContent.includes('获胜')) {
-                        statusElement.classList.add('win-status');
+                        updateBarAndText('win-status');
                     } else {
-                        statusElement.classList.add('draw-status');
+                        updateBarAndText('draw-status');
                     }
                 } else {
                     if (gameState.currentPlayer === 1) {
-                        statusElement.classList.add('player1-turn');
+                        updateBarAndText('player1-turn');
                     } else {
-                        statusElement.classList.add('player2-turn');
+                        updateBarAndText('player2-turn');
                     }
                 }
+            }
+
+            function updateBarAndText(status) {
+                const statusColor = {
+                    'player1-turn': 'rgba(255, 82, 82, 0.5)',
+                    'player2-turn': 'rgba(68, 138, 255, 0.5)',
+                    'win-status': 'rgba(76, 175, 80, 0.7)',
+                    'draw-status': 'rgba(255, 235, 59, 0.7)',
+                    'ai-thinking': 'rgba(156, 39, 176, 0.5)'
+                }[status];
+                const statusBarElement = document.querySelector('.status-bar');
+                const statusTextElement = document.getElementById('status');
+                statusBarElement.style.boxShadow = `0 0 16px ${statusColor}`;
+                statusTextElement.classList.add(status);
             }
 
             // 下棋
